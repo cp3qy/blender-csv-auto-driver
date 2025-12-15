@@ -12,3 +12,7 @@
 *.blend7
 *.blend8
 *.blend9
+
+# Assets and Docs
+assets/
+docs/
