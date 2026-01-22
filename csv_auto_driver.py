@@ -41,7 +41,6 @@ class CSV_OT_GenerateAnimation(bpy.types.Operator):
         color_a = props.color_start
         color_b = props.color_end
         
-        # 保存物体的初始位置和旋转（用于相对模式）
         initial_location = obj.location.copy()
         initial_rotation = obj.rotation_euler.copy()
         
