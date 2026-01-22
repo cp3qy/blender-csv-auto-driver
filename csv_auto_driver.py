@@ -1,10 +1,10 @@
 bl_info = {
     "name": "CSV Auto Driver",
     "author": "闲鱼：Ryan_Code",
-    "version": (4, 0),
+    "version": (4, 1),
     "blender": (4, 4, 3),
     "location": "View3D > Sidebar > CSV Driver",
-    "description": "功能：自定义颜色、位置XYZ、UV方向XY、多通道叠加。",
+    "description": "功能：自定义颜色、位置XYZ、旋转XYZ、UV方向XY、多通道叠加。",
     "category": "Animation",
 }
 
@@ -41,7 +41,12 @@ class CSV_OT_GenerateAnimation(bpy.types.Operator):
         color_a = props.color_start
         color_b = props.color_end
         
+        # 保存物体的初始位置和旋转（用于相对模式）
+        initial_location = obj.location.copy()
+        initial_rotation = obj.rotation_euler.copy()
+        
         print(f"Start Processing on: {obj.name} | Type: {target_type}")
+        print(f"Initial Location: {initial_location} | Initial Rotation: {initial_rotation}")
         
         try:
             with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
@@ -106,14 +111,24 @@ class CSV_OT_GenerateAnimation(bpy.types.Operator):
                                         input_socket.keyframe_insert(data_path="default_value", index=2, frame=frame_num)
 
                     elif target_type == 'LOC_X':
-                        obj.location.x = final_value
+                        obj.location.x = initial_location.x + final_value
                         obj.keyframe_insert(data_path="location", index=0, frame=frame_num)
                     elif target_type == 'LOC_Y':
-                        obj.location.y = final_value
+                        obj.location.y = initial_location.y + final_value
                         obj.keyframe_insert(data_path="location", index=1, frame=frame_num)
                     elif target_type == 'LOC_Z':
-                        obj.location.z = final_value
+                        obj.location.z = initial_location.z + final_value
                         obj.keyframe_insert(data_path="location", index=2, frame=frame_num)
+
+                    elif target_type == 'ROT_X':
+                        obj.rotation_euler.x = initial_rotation.x + final_value
+                        obj.keyframe_insert(data_path="rotation_euler", index=0, frame=frame_num)
+                    elif target_type == 'ROT_Y':
+                        obj.rotation_euler.y = initial_rotation.y + final_value
+                        obj.keyframe_insert(data_path="rotation_euler", index=1, frame=frame_num)
+                    elif target_type == 'ROT_Z':
+                        obj.rotation_euler.z = initial_rotation.z + final_value
+                        obj.keyframe_insert(data_path="rotation_euler", index=2, frame=frame_num)
 
                     elif target_type == 'LIGHT_ENERGY':
                         if obj.type == 'LIGHT':
@@ -202,6 +217,9 @@ class CSVDriverProperties(bpy.types.PropertyGroup):
             ('LOC_Z', "⬆️ 物体位置 Z (上下)", ""),
             ('LOC_Y', "➡️ 物体位置 Y (前后)", ""),
             ('LOC_X', "↗️ 物体位置 X (左右)", ""),
+            ('ROT_X', "🔄 物体旋转 X", ""),
+            ('ROT_Y', "🔄 物体旋转 Y", ""),
+            ('ROT_Z', "🔄 物体旋转 Z", ""),
             ('UV_MAPPING_X', "🌊 UV 位移 X (横向)", ""),
             ('UV_MAPPING_Y', "🌊 UV 位移 Y (纵向)", ""),
         ],
