@@ -1,10 +1,10 @@
 bl_info = {
-    "name": "CSV Auto Driver",
+    "name": "CSV Auto Driver V4.2",
     "author": "闲鱼：Ryan_Code",
-    "version": (4, 1),
+    "version": (4, 2),
     "blender": (4, 4, 3),
     "location": "View3D > Sidebar > CSV Driver",
-    "description": "功能：自定义颜色、位置XYZ、旋转XYZ、UV方向XY、多通道叠加。",
+    "description": "修复了相对模式下前段动画位置偏移的问题（增加了起始帧锚点）。",
     "category": "Animation",
 }
 
@@ -44,8 +44,15 @@ class CSV_OT_GenerateAnimation(bpy.types.Operator):
         initial_location = obj.location.copy()
         initial_rotation = obj.rotation_euler.copy()
         
+        start_frame = scene.frame_start
+        
+        if target_type.startswith('LOC'):
+            obj.keyframe_insert(data_path="location", frame=start_frame)
+        elif target_type.startswith('ROT'):
+            obj.keyframe_insert(data_path="rotation_euler", frame=start_frame)
+        
         print(f"Start Processing on: {obj.name} | Type: {target_type}")
-        print(f"Initial Location: {initial_location} | Initial Rotation: {initial_rotation}")
+        print(f"Initial State Locked at frame {start_frame}")
         
         try:
             with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
@@ -76,7 +83,6 @@ class CSV_OT_GenerateAnimation(bpy.types.Operator):
 
                     frame_num = (time_sec * fps) + offset
                     final_value = raw_value * scale
-
 
                     if target_type in ['LIGHT_COLOR', 'MAT_COLOR']:
                         mix_factor = max(0.0, min(1.0, final_value))
@@ -158,7 +164,7 @@ class CSV_OT_GenerateAnimation(bpy.types.Operator):
         return {'FINISHED'}
 
 class VIEW3D_PT_CSVDriverPanel(bpy.types.Panel):
-    bl_label = "CSV 驱动器"
+    bl_label = "CSV 驱动器 V4.2"
     bl_idname = "VIEW3D_PT_csv_driver"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
